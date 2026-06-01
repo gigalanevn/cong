@@ -79,15 +79,19 @@
 </head>
 <body>
 
+    <!-- KHU VỰC CHỨA LINK SHOPEE Ở ĐẦU TRANG -->
     <div id="shopee-container">
-        <a href="https://s.shopee.vn/AAAUhiQ8ae" target="_blank">🧡 Mua sắm tại Shopee tại đây 🧡</a>
+        <a href="https://s.shopee.vn/AAAUhiQ8ae" target="_blank">🧡 Mua sắm Shopee tại đây 🧡</a>
     </div>
 
+    <!-- TIÊU ĐỀ CHÍNH CỦA BẢNG CHẤM CÔNG -->
     <div class="main-header-title">BẢNG CHẤM CÔNG CÁ NHÂN</div>
 
     <div id="main-container">
+        <!-- PANEL ĐIỀU KHIỂN BÊN PHẢI / DƯỚI -->
         <div id="right-panel">
             
+            <!-- ĐỈNH TRANG: Ô NHẬP TÊN CỦA BẠN (TỐI ĐA 30 KÝ TỰ) -->
             <div class="panel-box" style="border: 2px solid #0070c0;">
                 <div class="panel-title" style="color: #0070c0; border-color: #0070c0;">TÊN NHÂN VIÊN CHẤM CÔNG</div>
                 <div class="form-group">
@@ -95,6 +99,7 @@
                 </div>
             </div>
 
+            <!-- NGAY DƯỚI TÊN: Ô CHỌN THÁNG LỊCH -->
             <div class="panel-box">
                 <div class="panel-title">CHỌN THÁNG LÀM VIỆC</div>
                 <div class="form-group">
@@ -102,6 +107,7 @@
                 </div>
             </div>
 
+            <!-- BẢNG TỔNG HỢP SỐ LIỆU -->
             <div class="panel-box">
                 <div class="panel-title">Kết Quả Tổng Hợp</div>
                 <table class="stat-table">
@@ -121,21 +127,26 @@
                     </tbody>
                 </table>
             </div>
+        </div>
 
-            <div class="panel-box">
+        <!-- VÙNG LỊCH CHÍNH VÀ CÁC THÀNH PHẦN PHÍA DƯỚI LỊCH -->
+        <div id="calendar-area">
+            <!-- Khung lưới lịch -->
+            <div id="calendar-grid-container"></div>
+
+            <!-- Ô GHI CHÚ CHUNG CHO THÁNG (ĐÃ CHUYỂN XUỐNG DƯỚI LỊCH) -->
+            <div class="panel-box" style="margin-top: 4px;">
                 <div class="panel-title">Ghi Chú Tháng</div>
                 <div class="form-group">
                     <textarea id="txt-thang-note" rows="3" placeholder="Nhập ghi chú chung cho tháng này tại đây..." style="font-weight: normal; font-size: 12px; resize: none;" oninput="ghiNhanGhiChuThang()"></textarea>
                 </div>
             </div>
-        </div>
 
-        <div id="calendar-area">
-            <div id="calendar-grid-container"></div>
-
+            <!-- CẤU HÌNH HỆ THỐNG QUẢN TRỊ (HIỂN THỊ DƯỚI LỊCH KHI ĐĂNG NHẬP) -->
             <div id="admin-box">
                 <div class="panel-title" style="color: #00b050; border-color: #00b050;">Quản Trị Hệ Thống</div>
                 
+                <!-- TÍNH NĂNG ẨN HIỆN LINK SHOPEE -->
                 <div style="margin-bottom: 12px; padding: 6px; background: #eafaf1; border-radius: 4px; font-size: 13px; font-weight: bold; color: #1e7e34;">
                     <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
                         <input type="checkbox" id="chk-shopee-toggle" onchange="xuLyAnHienLinkShopee()"> Hiện Link Shopee đầu trang
@@ -160,6 +171,7 @@
         </div>
     </div>
 
+    <!-- THANH ĐĂNG NHẬP / TRẠNG THÁI DƯỚI CÙNG TRANG -->
     <div id="auth-bar">
         <div style="font-size: 13px; font-weight: bold; font-style: italic;">Chế độ: <span id="status-text" style="color: #ffc000;">Cá Nhân</span></div>
         <div id="login-form">
@@ -173,7 +185,7 @@
     </div>
 
     <script>
-        const MAT_KHAU_ADMIN = "1"; 
+        const MAT_KHAU_ADMIN = "0983254756"; 
         let dataHeThong = {
             danhSachThang: {},
             tenHienTai: "",
@@ -297,7 +309,7 @@
             if (config.thangAmDau === undefined) config.thangAmDau = 4; 
             if (config.ghiChuThang === undefined) config.ghiChuThang = "";
 
-            // Hiển thị ghi chú tháng hiện tại lên panel box
+            // Cập nhật nội dung ghi chú tháng xuống ô textarea bên dưới lịch
             document.getElementById('txt-thang-note').value = config.ghiChuThang;
 
             const container = document.getElementById('calendar-grid-container');
