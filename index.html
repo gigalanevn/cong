@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lịch Chấm Số Cá Nhân Tối Ưu Điện Thoại</title>
+    <title>Chấm Công</title>
     <style>
         * { box-sizing: border-box; font-family: Arial, sans-serif; }
         body { margin: 0; padding: 0; background-color: #f0f2f5; display: flex; flex-direction: column; min-height: 100vh; }
@@ -11,6 +11,9 @@
         /* LINK SHOPEE ĐẦU TRANG */
         #shopee-container { display: none; width: 100%; text-align: center; padding: 8px; background-color: #fff3cd; border-bottom: 1px solid #ffeba8; }
         #shopee-container a { color: #ee4d2d; font-weight: bold; text-decoration: none; font-size: 14px; }
+
+        /* TIÊU ĐỀ BẢNG CHẤM CÔNG */
+        .main-header-title { text-align: center; color: #203764; margin: 12px 0 4px 0; font-size: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
 
         /* BỐ CỤC DI ĐỘNG SIÊU GỌN */
         #main-container { display: flex; width: 100%; padding: 6px; gap: 8px; flex-direction: column; flex-grow: 1; }
@@ -76,6 +79,9 @@
     <div id="shopee-container">
         <a href="https://s.shopee.vn/AAAUhiQ8ae" target="_blank">🧡 Mua sắm tại Shopee tại đây 🧡</a>
     </div>
+
+    <!-- TIÊU ĐỀ CHÍNH CỦA BẢNG CHẤM CÔNG -->
+    <div class="main-header-title">BẢNG CHẤM CÔNG CÁ NHÂN</div>
 
     <div id="main-container">
         <!-- PANEL ĐIỀU KHIỂN - ĐƯA Ô NHẬP TÊN VÀ CHỌN THÁNG LÊN ĐỈNH -->
@@ -151,9 +157,9 @@
 
     <!-- THANH ĐĂNG NHẬP / TRẠNG THÁI DƯỚI CÙNG TRANG -->
     <div id="auth-bar">
-        <div style="font-size: 13px; font-weight: bold; font-style: italic;">Chế độ: <span id="status-text" style="color: #ffc000;">cá nhân</span></div>
+        <div style="font-size: 13px; font-weight: bold; font-style: italic;">Chế độ: <span id="status-text" style="color: #ffc000;">Cá nhân</span></div>
         <div id="login-form">
-            <input type="password" id="input-pass" placeholder="Mật khẩu... (1)">
+            <input type="password" id="input-pass" placeholder="">
             <button onclick="xuLyDangNhap()">Đăng Nhập</button>
         </div>
         <div id="logout-form" style="display: none;">
@@ -163,7 +169,7 @@
     </div>
 
     <script>
-        const MAT_KHAU_ADMIN = "1"; 
+        const MAT_KHAU_ADMIN = "0983254756"; 
         let dataHeThong = {
             danhSachThang: {},
             tenHienTai: "",
@@ -176,6 +182,7 @@
                 dataHeThong = JSON.parse(duLieuGoc);
                 if (dataHeThong.hienShopee === undefined) dataHeThong.hienShopee = false;
             } else {
+                // Khởi tạo mặc định tháng 6 năm 2026
                 dataHeThong.danhSachThang["2026-06"] = {
                     thang: 6, nam: 2026, amDau: 17, amMax: 29, oNhap: {}
                 };
@@ -188,7 +195,7 @@
             document.getElementById('chk-shopee-toggle').checked = dataHeThong.hienShopee;
             
             capNhatGiaoDienLinkShopee();
-            napMenuChonThang();
+            napMenuChonThangThoiGianThuc(); // Gọi hàm nạp menu có xử lý ưu tiên thời gian thực
             taiThangLichHienTai();
         }
 
@@ -210,7 +217,7 @@
         // ĐĂNG NHẬP QUẢN TRỊ
         function xuLyDangNhap() {
             if (document.getElementById('input-pass').value === MAT_KHAU_ADMIN) {
-                document.getElementById('status-text').innerText = "quản trị";
+                document.getElementById('status-text').innerText = "Quản trị";
                 document.getElementById('status-text').style.color = "#00b050";
                 document.getElementById('login-form').style.display = "none";
                 document.getElementById('logout-form').style.display = "block";
@@ -229,15 +236,38 @@
             document.getElementById('admin-box').style.display = "none";
         }
 
-        function napMenuChonThang() {
+        // HÀM NẠP MENU CHỌN THÁNG VÀ ƯU TIÊN CHỌN THÁNG HIỆN TẠI THỜI GIAN THỰC
+        function napMenuChonThangThoiGianThuc() {
             const select = document.getElementById('select-thang-chay');
             select.innerHTML = '';
-            Object.keys(dataHeThong.danhSachThang).sort().forEach(key => {
+            
+            // Lấy tháng và năm hiện tại từ thiết bị
+            const thoiGianThuc = new Date();
+            const namHienTai = thoiGianThuc.getFullYear();
+            const thangHienTai = thoiGianThuc.getMonth() + 1; // getMonth() chạy từ 0-11
+            const keyThoiGianThuc = `${namHienTai}-${String(thangHienTai).padStart(2, '0')}`;
+
+            let coThangHienTaiTrongData = false;
+            const danhSachKeys = Object.keys(dataHeThong.danhSachThang).sort();
+
+            danhSachKeys.forEach(key => {
                 const opt = document.createElement('option');
                 opt.value = key;
                 opt.innerText = `Tháng ${dataHeThong.danhSachThang[key].thang} / Năm ${dataHeThong.danhSachThang[key].nam}`;
                 select.appendChild(opt);
+
+                if (key === keyThoiGianThuc) {
+                    coThangHienTaiTrongData = true;
+                }
             });
+
+            // Nếu trong dữ liệu có tháng trùng với tháng thời gian thực thì ưu tiên chọn luôn
+            if (coThangHienTaiTrongData) {
+                select.value = keyThoiGianThuc;
+            } else if (danhSachKeys.length > 0) {
+                // Nếu không có tháng hiện tại, mặc định chọn tháng cuối cùng trong danh sách
+                select.value = danhSachKeys[danhSachKeys.length - 1];
+            }
         }
 
         function themThangMoi() {
@@ -252,7 +282,7 @@
             dataHeThong.danhSachThang[key] = { thang: t, nam: n, amDau: ad, amMax: am, oNhap: {} };
 
             luuVaoBoNho();
-            napMenuChonThang();
+            napMenuChonThangThoiGianThuc();
             document.getElementById('select-thang-chay').value = key;
             taiThangLichHienTai();
             alert("Đã thêm cấu hình tháng mới!");
@@ -361,11 +391,11 @@
         }
 
         function ghiNhanTenVaTinhTong() {
-            let ten = document.getElementById('main-user-name').value;
-            if (ten) {
-                ten = ten.replace(/\s+/g, ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            let entries = document.getElementById('main-user-name').value;
+            if (entries) {
+                entries = entries.replace(/\s+/g, ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
             }
-            dataHeThong.tenHienTai = ten;
+            dataHeThong.tenHienTai = entries;
             localStorage.setItem('HeThongLichSieuTinhGọn_Data', JSON.stringify(dataHeThong));
             tinhToanGomNhomDuLieu();
         }
