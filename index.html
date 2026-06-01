@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch Chấm Số Cá Nhân Tối Ưu Điện Thoại</title>
+    <style>
+        * { box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { margin: 0; padding: 0; background-color: #f0f2f5; display: flex; flex-direction: column; min-height: 100vh; }
+
+        /* LINK SHOPEE ĐẦU TRANG */
+        #shopee-container { display: none; width: 100%; text-align: center; padding: 8px; background-color: #fff3cd; border-bottom: 1px solid #ffeba8; }
+        #shopee-container a { color: #ee4d2d; font-weight: bold; text-decoration: none; font-size: 14px; }
+
+        /* BỐ CỤC DI ĐỘNG SIÊU GỌN */
+        #main-container { display: flex; width: 100%; padding: 6px; gap: 8px; flex-direction: column; flex-grow: 1; }
+        
+        @media (min-width: 768px) {
+            #main-container { flex-direction: row; }
+            #calendar-area { flex-grow: 1; }
+            #right-panel { width: 300px; flex-shrink: 0; }
+        }
+
+        /* KHU VỰC LỊCH */
+        #calendar-area { background: #ffffff; padding: 6px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px; }
+
+        /* LỊCH NHỎ GỌN TỐI ĐA */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid #555; border-left: 1px solid #555; width: 100%; }
+        .thu-cell { font-size: 11px; font-weight: bold; text-align: center; padding: 4px 0; border-right: 1px solid #555; border-bottom: 1px solid #555; color: #ff0000; }
+        .bg-blue { background-color: #b4c6e7; }
+        .bg-yellow { background-color: #ffd966; }
+
+        /* Ô NGÀY LÀM NHỎ LẠI (55PX) ĐỂ VỪA VẶN DI ĐỘNG */
+        .day-cell { height: 55px; border-right: 1px solid #555; border-bottom: 1px solid #555; padding: 2px; display: flex; flex-direction: column; justify-content: space-between; position: relative; cursor: pointer; }
+        .day-header { display: flex; justify-content: space-between; font-size: 10px; font-weight: bold; pointer-events: none; line-height: 1; }
+        .txt-duong { color: #0070c0; }
+        .txt-am { color: #ed7d31; }
+
+        /* Ô NHẬP SỐ KHÍT VỪA VỚI Ô KHUNG LỊCH */
+        .day-content-area { width: 100%; display: flex; justify-content: center; margin-bottom: 1px; pointer-events: none; }
+        .day-input-num { width: 95%; font-size: 15px; font-weight: bold; text-align: center; border: 1px solid #aaa; border-radius: 3px; padding: 2px 0; background-color: #fff; pointer-events: auto; -moz-appearance: textfield; }
+        .day-input-num::-webkit-outer-spin-button, .day-input-num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .day-input-num:focus { border: 1px solid #0070c0; outline: none; background-color: #fff !important; }
+
+        /* PANEL ĐIỀU KHIỂN BÊN PHẢI / DƯỚI */
+        #right-panel { display: flex; flex-direction: column; gap: 8px; }
+        .panel-box { background: #ffffff; padding: 10px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .panel-title { margin-top: 0; font-size: 12px; color: #203764; border-bottom: 2px solid #203764; padding-bottom: 3px; margin-bottom: 8px; text-transform: uppercase; font-weight: bold; }
+        
+        .form-group { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+        .form-group input, .form-group select { padding: 6px; font-size: 13px; border: 2px solid #ccc; border-radius: 4px; width: 100%; font-weight: bold; }
+        .input-highlight { border: 2px solid #0070c0 !important; background-color: #f0f7ff; }
+
+        /* BẢNG TỔNG HỢP RÚT GỌN */
+        .stat-table { width: 100%; border-collapse: collapse; margin-top: 2px; font-size: 12px; }
+        .stat-table th, .stat-table td { border: 1px solid #ccc; padding: 6px 4px; text-align: center; }
+        .stat-table th { background: #f2f2f2; font-weight: bold; color: #333; }
+        .stat-table td { font-weight: bold; }
+
+        /* CẤU HÌNH HỆ THỐNG QUẢN TRỊ (ĐỂ DƯỚI LỊCH) */
+        #admin-box { display: none; background: #ffffff; padding: 10px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 2px solid #00b050; margin-top: 4px; }
+
+        /* THANH ĐĂNG NHẬP DƯỚI CÙNG */
+        #auth-bar {
+            width: 100%; background: #203764; color: white; padding: 8px 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1); margin-top: auto; flex-wrap: wrap; gap: 6px;
+        }
+        #auth-bar input { padding: 5px; border-radius: 4px; border: none; width: 90px; font-size: 12px; color: #000; }
+        #auth-bar button { padding: 5px 10px; background: #ffd966; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; color: black; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+    <!-- KHU VỰC CHỨA LINK SHOPEE Ở ĐẦU TRANG -->
+    <div id="shopee-container">
+        <a href="https://s.shopee.vn/AAAUhiQ8ae" target="_blank">🧡 Mua sắm tại Shopee tại đây 🧡</a>
+    </div>
+
+    <div id="main-container">
+        <!-- PANEL ĐIỀU KHIỂN - ĐƯA Ô NHẬP TÊN VÀ CHỌN THÁNG LÊN ĐỈNH -->
+        <div id="right-panel">
+            
+            <!-- ĐỈNH TRANG: Ô NHẬP TÊN CỦA BẠN (TỐI ĐA 30 KÝ TỰ) -->
+            <div class="panel-box" style="border: 2px solid #0070c0;">
+                <div class="panel-title" style="color: #0070c0; border-color: #0070c0;">TÊN NHÂN VIÊN CHẤM CÔNG</div>
+                <div class="form-group">
+                    <input type="text" id="main-user-name" class="input-highlight" placeholder="Nhập tên của bạn..." maxlength="30" oninput="ghiNhanTenVaTinhTong()">
+                </div>
+            </div>
+
+            <!-- NGAY DƯỚI TÊN: Ô CHỌN THÁNG LỊCH -->
+            <div class="panel-box">
+                <div class="panel-title">CHỌN THÁNG LÀM VIỆC</div>
+                <div class="form-group">
+                    <select id="select-thang-chay" onchange="taiThangLichHienTai()"></select>
+                </div>
+            </div>
+
+            <!-- BẢNG TỔNG HỢP SỐ LIỆU -->
+            <div class="panel-box">
+                <div class="panel-title">Kết Quả Tổng Hợp</div>
+                <table class="stat-table">
+                    <thead>
+                        <tr>
+                            <th>Tên Nhân Viên</th>
+                            <th>Ngày Thường</th>
+                            <th>Chủ Nhật</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="lbl-tong-ten" style="color: #203764; text-align: left;">---</td>
+                            <td id="lbl-tong-thuong" style="color: #0070c0;">0</td>
+                            <td id="lbl-tong-cn" style="color: #ed7d31;">0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- VÙNG LỊCH CHÍNH VÀ KHU VỰC QUẢN TRỊ PHÍA DƯỚI LỊCH -->
+        <div id="calendar-area">
+            <!-- Khung lưới lịch -->
+            <div id="calendar-grid-container"></div>
+
+            <!-- CẤU HÌNH HỆ THỐNG QUẢN TRỊ (HIỂN THỊ DƯỚI LỊCH KHI ĐĂNG NHẬP) -->
+            <div id="admin-box">
+                <div class="panel-title" style="color: #00b050; border-color: #00b050;">Quản Trị Hệ Thống</div>
+                
+                <!-- TÍNH NĂNG ẨN HIỆN LINK SHOPEE -->
+                <div style="margin-bottom: 12px; padding: 6px; background: #eafaf1; border-radius: 4px; font-size: 13px; font-weight: bold; color: #1e7e34;">
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <input type="checkbox" id="chk-shopee-toggle" onchange="xuLyAnHienLinkShopee()"> Hiện Link Shopee đầu trang
+                    </label>
+                </div>
+
+                <div class="panel-title" style="color: #555; border-color: #ccc; margin-top: 10px;">Thêm Tháng Mới</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px;">
+                    <div class="form-group"><input type="number" id="add-thang" value="6" placeholder="Tháng"></div>
+                    <div class="form-group"><input type="number" id="add-nam" value="2026" placeholder="Năm"></div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px;">
+                    <div class="form-group"><input type="number" id="add-am-dau" value="17" placeholder="Ngày 1 Âm là mấy"></div>
+                    <div class="form-group"><input type="number" id="add-am-max" value="29" placeholder="Số ngày Âm (29/30)"></div>
+                </div>
+                <button style="width:100%; padding:8px; background:#00b050; color:white; border:none; font-weight:bold; border-radius:4px; cursor:pointer; font-size: 13px;" onclick="themThangMoi()">Tạo Tháng Mới</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- THANH ĐĂNG NHẬP / TRẠNG THÁI DƯỚI CÙNG TRANG -->
+    <div id="auth-bar">
+        <div style="font-size: 13px; font-weight: bold; font-style: italic;">Chế độ: <span id="status-text" style="color: #ffc000;">cá nhân</span></div>
+        <div id="login-form">
+            <input type="password" id="input-pass" placeholder="Mật khẩu... (1)">
+            <button onclick="xuLyDangNhap()">Đăng Nhập</button>
+        </div>
+        <div id="logout-form" style="display: none;">
+            <span style="font-weight: bold; color: #00b050; font-size: 13px; margin-right: 5px;">✓ Admin</span>
+            <button onclick="xuLyDangXuat()" style="background: #ffc000;">Đăng Xuất</button>
+        </div>
+    </div>
+
+    <script>
+        const MAT_KHAU_ADMIN = "1"; 
+        let dataHeThong = {
+            danhSachThang: {},
+            tenHienTai: "",
+            hienShopee: false
+        };
+
+        function khoiDongHeThong() {
+            const duLieuGoc = localStorage.getItem('HeThongLichSieuTinhGọn_Data');
+            if (duLieuGoc) {
+                dataHeThong = JSON.parse(duLieuGoc);
+                if (dataHeThong.hienShopee === undefined) dataHeThong.hienShopee = false;
+            } else {
+                dataHeThong.danhSachThang["2026-06"] = {
+                    thang: 6, nam: 2026, amDau: 17, amMax: 29, oNhap: {}
+                };
+                dataHeThong.tenHienTai = "";
+                dataHeThong.hienShopee = false;
+                luuVaoBoNho();
+            }
+            
+            document.getElementById('main-user-name').value = dataHeThong.tenHienTai || "";
+            document.getElementById('chk-shopee-toggle').checked = dataHeThong.hienShopee;
+            
+            capNhatGiaoDienLinkShopee();
+            napMenuChonThang();
+            taiThangLichHienTai();
+        }
+
+        function luuVaoBoNho() {
+            localStorage.setItem('HeThongLichSieuTinhGọn_Data', JSON.stringify(dataHeThong));
+        }
+
+        function xuLyAnHienLinkShopee() {
+            dataHeThong.hienShopee = document.getElementById('chk-shopee-toggle').checked;
+            luuVaoBoNho();
+            capNhatGiaoDienLinkShopee();
+        }
+
+        function capNhatGiaoDienLinkShopee() {
+            const el = document.getElementById('shopee-container');
+            el.style.display = dataHeThong.hienShopee ? "block" : "none";
+        }
+
+        // ĐĂNG NHẬP QUẢN TRỊ
+        function xuLyDangNhap() {
+            if (document.getElementById('input-pass').value === MAT_KHAU_ADMIN) {
+                document.getElementById('status-text').innerText = "quản trị";
+                document.getElementById('status-text').style.color = "#00b050";
+                document.getElementById('login-form').style.display = "none";
+                document.getElementById('logout-form').style.display = "block";
+                document.getElementById('admin-box').style.display = "block";
+            } else {
+                alert("Mật khẩu quản trị sai!");
+            }
+        }
+
+        function xuLyDangXuat() {
+            document.getElementById('input-pass').value = '';
+            document.getElementById('status-text').innerText = "cá nhân";
+            document.getElementById('status-text').style.color = "#ffc000";
+            document.getElementById('login-form').style.display = "block";
+            document.getElementById('logout-form').style.display = "none";
+            document.getElementById('admin-box').style.display = "none";
+        }
+
+        function napMenuChonThang() {
+            const select = document.getElementById('select-thang-chay');
+            select.innerHTML = '';
+            Object.keys(dataHeThong.danhSachThang).sort().forEach(key => {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.innerText = `Tháng ${dataHeThong.danhSachThang[key].thang} / Năm ${dataHeThong.danhSachThang[key].nam}`;
+                select.appendChild(opt);
+            });
+        }
+
+        function themThangMoi() {
+            const t = parseInt(document.getElementById('add-thang').value);
+            const n = parseInt(document.getElementById('add-nam').value);
+            const ad = parseInt(document.getElementById('add-am-dau').value);
+            const am = parseInt(document.getElementById('add-am-max').value);
+
+            if(!t || !n || !ad || !am) { alert("Vui lòng điền đủ thông tin lịch!"); return; }
+
+            const key = `${n}-${String(t).padStart(2, '0')}`;
+            dataHeThong.danhSachThang[key] = { thang: t, nam: n, amDau: ad, amMax: am, oNhap: {} };
+
+            luuVaoBoNho();
+            napMenuChonThang();
+            document.getElementById('select-thang-chay').value = key;
+            taiThangLichHienTai();
+            alert("Đã thêm cấu hình tháng mới!");
+        }
+
+        function taiThangLichHienTai() {
+            const keyHienTai = document.getElementById('select-thang-chay').value;
+            if (!keyHienTai) return;
+
+            const config = dataHeThong.danhSachThang[keyHienTai];
+            const container = document.getElementById('calendar-grid-container');
+            container.innerHTML = '';
+
+            const grid = document.createElement('div');
+            grid.className = 'calendar-grid';
+
+            const thuArr = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+            thuArr.forEach((thu, idx) => {
+                const cell = document.createElement('div');
+                cell.className = `thu-cell ${idx === 6 ? 'bg-yellow' : 'bg-blue'}`;
+                cell.innerText = thu;
+                grid.appendChild(cell);
+            });
+
+            const ngayDauTien = new Date(config.nam, config.thang - 1, 1);
+            let thuDauTien = ngayDauTien.getDay();
+            if (thuDauTien === 0) thuDauTien = 7;
+
+            for (let i = 1; i < thuDauTien; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'day-cell';
+                grid.appendChild(emptyCell);
+            }
+
+            let ngayHienTai = new Date(ngayDauTien);
+            let ngayAmChay = config.amDau;
+            let cotHienTai = thuDauTien;
+
+            while (ngayHienTai.getMonth() === (config.thang - 1)) {
+                const dayKey = ngayHienTai.getDate();
+                const laChunhat = (cotHienTai === 7);
+                
+                const cell = document.createElement('div');
+                cell.className = `day-cell ${laChunhat ? 'bg-yellow' : ''}`;
+                cell.setAttribute('onclick', `kichHoatFocusVaoOPhanTu(event, ${dayKey})`);
+
+                const txtDuong = String(dayKey).padStart(2, '0');
+                const txtAm = String(ngayAmChay).padStart(2, '0');
+
+                const savedData = config.oNhap[dayKey] || { numValue: "" };
+
+                cell.innerHTML = `
+                    <div class="day-header">
+                        <span class="txt-duong">${txtDuong}</span>
+                        <span class="txt-am">${txtAm}</span>
+                    </div>
+                    <div class="day-content-area">
+                        <input type="number" pattern="[0-9]*" class="day-input-num" placeholder="0" 
+                               id="num-input-${dayKey}"
+                               data-day="${dayKey}" 
+                               data-loai="${laChunhat ? 'chunhat' : 'ngaythuong'}" 
+                               value="${savedData.numValue}" 
+                               oninput="ghiNhanSoLieuTrucTiep('${keyHienTai}', ${dayKey})">
+                    </div>
+                `;
+
+                grid.appendChild(cell);
+
+                ngayAmChay++;
+                if (ngayAmChay > config.amMax) ngayAmChay = 1;
+                ngayHienTai.setDate(ngayHienTai.getDate() + 1);
+                if (cotHienTai === 7) cotHienTai = 1; else cotHienTai++;
+            }
+
+            if (cotHienTai !== 1) {
+                for (let i = cotHienTai; i <= 7; i++) {
+                    const emptyCell = document.createElement('div');
+                    emptyCell.className = `day-cell ${i === 7 ? 'bg-yellow' : ''}`;
+                    grid.appendChild(emptyCell);
+                }
+            }
+
+            container.appendChild(grid);
+            tinhToanGomNhomDuLieu();
+        }
+
+        function kichHoatFocusVaoOPhanTu(event, dayKey) {
+            if (event.target.tagName !== 'INPUT') {
+                const inp = document.getElementById(`num-input-${dayKey}`);
+                if (inp) inp.focus();
+            }
+        }
+
+        function ghiNhanSoLieuTrucTiep(thangKey, dayKey) {
+            const numInp = document.getElementById(`num-input-${dayKey}`);
+
+            if (!dataHeThong.danhSachThang[thangKey].oNhap[dayKey]) {
+                dataHeThong.danhSachThang[thangKey].oNhap[dayKey] = {};
+            }
+
+            dataHeThong.danhSachThang[thangKey].oNhap[dayKey].numValue = numInp.value;
+            dataHeThong.danhSachThang[thangKey].oNhap[dayKey].loaiNgay = numInp.dataset.loai;
+
+            luuVaoBoNho(); 
+            tinhToanGomNhomDuLieu(); 
+        }
+
+        function ghiNhanTenVaTinhTong() {
+            let ten = document.getElementById('main-user-name').value;
+            if (ten) {
+                ten = ten.replace(/\s+/g, ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            }
+            dataHeThong.tenHienTai = ten;
+            localStorage.setItem('HeThongLichSieuTinhGọn_Data', JSON.stringify(dataHeThong));
+            tinhToanGomNhomDuLieu();
+        }
+
+        function tinhToanGomNhomDuLieu() {
+            const tenNguoiDung = dataHeThong.tenHienTai ? dataHeThong.tenHienTai.trim() : "";
+            
+            if (tenNguoiDung === "") {
+                document.getElementById('lbl-tong-ten').innerText = "Chưa nhập tên...";
+                document.getElementById('lbl-tong-thuong').innerText = "0";
+                document.getElementById('lbl-tong-cn').innerText = "0";
+                return;
+            }
+
+            document.getElementById('lbl-tong-ten').innerText = tenNguoiDung;
+
+            let tongNgayThuong = 0;
+            let tongChuNhat = 0;
+
+            const keyHienTai = document.getElementById('select-thang-chay').value;
+            if (!keyHienTai) return;
+
+            const oNhapDuLieu = dataHeThong.danhSachThang[keyHienTai].oNhap;
+
+            Object.keys(oNhapDuLieu).forEach(dayKey => {
+                const item = oNhapDuLieu[dayKey];
+                const giaTriSo = parseFloat(item.numValue) || 0;
+                const loaiNgay = item.loaiNgay || "ngaythuong";
+
+                if (giaTriSo > 0) {
+                    if (loaiNgay === 'chunhat') {
+                        tongChuNhat += giaTriSo;
+                    } else {
+                        tongNgayThuong += giaTriSo;
+                    }
+                }
+            });
+
+            document.getElementById('lbl-tong-thuong').innerText = tongNgayThuong.toLocaleString('vi-VN');
+            document.getElementById('lbl-tong-cn').innerText = tongChuNhat.toLocaleString('vi-VN');
+        }
+
+        window.onload = khoiDongHeThong;
+    </script>
+</body>
+</html>
