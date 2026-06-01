@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chấm Công</title>
+    <title>Lịch Chấm Số Cá Nhân Tối Ưu Điện Thoại</title>
     <style>
         * { box-sizing: border-box; font-family: Arial, sans-serif; }
         body { margin: 0; padding: 0; background-color: #f0f2f5; display: flex; flex-direction: column; min-height: 100vh; }
@@ -33,17 +33,21 @@
         .bg-blue { background-color: #b4c6e7; }
         .bg-yellow { background-color: #ffd966; }
 
-        /* Ô NGÀY LÀM NHỎ LẠI (55PX) ĐỂ VỪA VẶN DI ĐỘNG */
-        .day-cell { height: 55px; border-right: 1px solid #555; border-bottom: 1px solid #555; padding: 2px; display: flex; flex-direction: column; justify-content: space-between; position: relative; cursor: pointer; }
+        /* Ô NGÀY LÀM TỐI ƯU CHIỀU CAO (75PX) ĐỂ CHỨA THÊM Ô GHI CHÚ NHỎ */
+        .day-cell { height: 75px; border-right: 1px solid #555; border-bottom: 1px solid #555; padding: 2px; display: flex; flex-direction: column; justify-content: space-between; position: relative; cursor: pointer; }
         .day-header { display: flex; justify-content: space-between; font-size: 10px; font-weight: bold; pointer-events: none; line-height: 1; }
         .txt-duong { color: #0070c0; }
-        .txt-am { color: #ed7d31; }
+        .txt-am { color: #ed7d31; font-size: 9px; }
 
-        /* Ô NHẬP SỐ KHÍT VỪA VỚI Ô KHUNG LỊCH */
-        .day-content-area { width: 100%; display: flex; justify-content: center; margin-bottom: 1px; pointer-events: none; }
-        .day-input-num { width: 95%; font-size: 15px; font-weight: bold; text-align: center; border: 1px solid #aaa; border-radius: 3px; padding: 2px 0; background-color: #fff; pointer-events: auto; -moz-appearance: textfield; }
+        /* Ô NHẬP SỐ VÀ Ô GHI CHÚ */
+        .day-content-area { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 2px; pointer-events: none; }
+        .day-input-num { width: 95%; font-size: 14px; font-weight: bold; text-align: center; border: 1px solid #aaa; border-radius: 3px; padding: 1px 0; background-color: #fff; pointer-events: auto; -moz-appearance: textfield; }
         .day-input-num::-webkit-outer-spin-button, .day-input-num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         .day-input-num:focus { border: 1px solid #0070c0; outline: none; background-color: #fff !important; }
+        
+        /* Ô GHI CHÚ NHỎ DƯỚI Ô SỐ */
+        .day-input-note { width: 95%; font-size: 9px; text-align: center; border: 1px solid #ccc; border-radius: 2px; padding: 1px 0; background-color: #fafafa; pointer-events: auto; color: #555; }
+        .day-input-note:focus { border: 1px solid #0070c0; outline: none; background-color: #fff; }
 
         /* PANEL ĐIỀU KHIỂN BÊN PHẢI / DƯỚI */
         #right-panel { display: flex; flex-direction: column; gap: 8px; }
@@ -51,7 +55,7 @@
         .panel-title { margin-top: 0; font-size: 12px; color: #203764; border-bottom: 2px solid #203764; padding-bottom: 3px; margin-bottom: 8px; text-transform: uppercase; font-weight: bold; }
         
         .form-group { display: flex; flex-direction: column; gap: 4px; width: 100%; }
-        .form-group input, .form-group select { padding: 6px; font-size: 13px; border: 2px solid #ccc; border-radius: 4px; width: 100%; font-weight: bold; }
+        .form-group input, .form-group select, .form-group textarea { padding: 6px; font-size: 13px; border: 2px solid #ccc; border-radius: 4px; width: 100%; font-weight: bold; }
         .input-highlight { border: 2px solid #0070c0 !important; background-color: #f0f7ff; }
 
         /* BẢNG TỔNG HỢP RÚT GỌN */
@@ -69,25 +73,21 @@
             display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 -2px 5px rgba(0,0,0,0.1); margin-top: auto; flex-wrap: wrap; gap: 6px;
         }
-        #auth-bar input { padding: 5px; border-radius: 4px; border: none; width: 90px; font-size: 12px; color: #000; }
+        #auth-bar input { padding: 5px; border-radius: 4px; border: none; width: 70px; font-size: 12px; color: #000; text-align: center; }
         #auth-bar button { padding: 5px 10px; background: #ffd966; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; color: black; font-size: 12px; }
     </style>
 </head>
 <body>
 
-    <!-- KHU VỰC CHỨA LINK SHOPEE Ở ĐẦU TRANG -->
     <div id="shopee-container">
         <a href="https://s.shopee.vn/AAAUhiQ8ae" target="_blank">🧡 Mua sắm tại Shopee tại đây 🧡</a>
     </div>
 
-    <!-- TIÊU ĐỀ CHÍNH CỦA BẢNG CHẤM CÔNG -->
     <div class="main-header-title">BẢNG CHẤM CÔNG CÁ NHÂN</div>
 
     <div id="main-container">
-        <!-- PANEL ĐIỀU KHIỂN - ĐƯA Ô NHẬP TÊN VÀ CHỌN THÁNG LÊN ĐỈNH -->
         <div id="right-panel">
             
-            <!-- ĐỈNH TRANG: Ô NHẬP TÊN CỦA BẠN (TỐI ĐA 30 KÝ TỰ) -->
             <div class="panel-box" style="border: 2px solid #0070c0;">
                 <div class="panel-title" style="color: #0070c0; border-color: #0070c0;">TÊN NHÂN VIÊN CHẤM CÔNG</div>
                 <div class="form-group">
@@ -95,7 +95,6 @@
                 </div>
             </div>
 
-            <!-- NGAY DƯỚI TÊN: Ô CHỌN THÁNG LỊCH -->
             <div class="panel-box">
                 <div class="panel-title">CHỌN THÁNG LÀM VIỆC</div>
                 <div class="form-group">
@@ -103,7 +102,6 @@
                 </div>
             </div>
 
-            <!-- BẢNG TỔNG HỢP SỐ LIỆU -->
             <div class="panel-box">
                 <div class="panel-title">Kết Quả Tổng Hợp</div>
                 <table class="stat-table">
@@ -123,18 +121,21 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="panel-box">
+                <div class="panel-title">Ghi Chú Tháng</div>
+                <div class="form-group">
+                    <textarea id="txt-thang-note" rows="3" placeholder="Nhập ghi chú chung cho tháng này tại đây..." style="font-weight: normal; font-size: 12px; resize: none;" oninput="ghiNhanGhiChuThang()"></textarea>
+                </div>
+            </div>
         </div>
 
-        <!-- VÙNG LỊCH CHÍNH VÀ KHU VỰC QUẢN TRỊ PHÍA DƯỚI LỊCH -->
         <div id="calendar-area">
-            <!-- Khung lưới lịch -->
             <div id="calendar-grid-container"></div>
 
-            <!-- CẤU HÌNH HỆ THỐNG QUẢN TRỊ (HIỂN THỊ DƯỚI LỊCH KHI ĐĂNG NHẬP) -->
             <div id="admin-box">
                 <div class="panel-title" style="color: #00b050; border-color: #00b050;">Quản Trị Hệ Thống</div>
                 
-                <!-- TÍNH NĂNG ẨN HIỆN LINK SHOPEE -->
                 <div style="margin-bottom: 12px; padding: 6px; background: #eafaf1; border-radius: 4px; font-size: 13px; font-weight: bold; color: #1e7e34;">
                     <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
                         <input type="checkbox" id="chk-shopee-toggle" onchange="xuLyAnHienLinkShopee()"> Hiện Link Shopee đầu trang
@@ -150,26 +151,29 @@
                     <div class="form-group"><input type="number" id="add-am-dau" value="17" placeholder="Ngày 1 Âm là mấy"></div>
                     <div class="form-group"><input type="number" id="add-am-max" value="29" placeholder="Số ngày Âm (29/30)"></div>
                 </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px;">
+                    <div class="form-group"><input type="number" id="add-t-am-dau" value="4" placeholder="Tháng Âm bắt đầu"></div>
+                    <div class="form-group"><span style="font-size: 11px; color:#666; align-self: center;">(Ví dụ: Tháng 4 Âm lịch)</span></div>
+                </div>
                 <button style="width:100%; padding:8px; background:#00b050; color:white; border:none; font-weight:bold; border-radius:4px; cursor:pointer; font-size: 13px;" onclick="themThangMoi()">Tạo Tháng Mới</button>
             </div>
         </div>
     </div>
 
-    <!-- THANH ĐĂNG NHẬP / TRẠNG THÁI DƯỚI CÙNG TRANG -->
     <div id="auth-bar">
-        <div style="font-size: 13px; font-weight: bold; font-style: italic;">Chế độ: <span id="status-text" style="color: #ffc000;">Cá nhân</span></div>
+        <div style="font-size: 13px; font-weight: bold; font-style: italic;">Chế độ: <span id="status-text" style="color: #ffc000;">Cá Nhân</span></div>
         <div id="login-form">
-            <input type="password" id="input-pass" placeholder="">
+            <input type="password" id="input-pass" placeholder="..." autocomplete="new-password">
             <button onclick="xuLyDangNhap()">Đăng Nhập</button>
         </div>
         <div id="logout-form" style="display: none;">
-            <span style="font-weight: bold; color: #00b050; font-size: 13px; margin-right: 5px;">✓ Admin</span>
+            <span style="font-weight: bold; color: #00b050; font-size: 13px; margin-right: 5px;">✓ Quản trị</span>
             <button onclick="xuLyDangXuat()" style="background: #ffc000;">Đăng Xuất</button>
         </div>
     </div>
 
     <script>
-        const MAT_KHAU_ADMIN = "0983254756"; 
+        const MAT_KHAU_ADMIN = "1"; 
         let dataHeThong = {
             danhSachThang: {},
             tenHienTai: "",
@@ -182,9 +186,8 @@
                 dataHeThong = JSON.parse(duLieuGoc);
                 if (dataHeThong.hienShopee === undefined) dataHeThong.hienShopee = false;
             } else {
-                // Khởi tạo mặc định tháng 6 năm 2026
                 dataHeThong.danhSachThang["2026-06"] = {
-                    thang: 6, nam: 2026, amDau: 17, amMax: 29, oNhap: {}
+                    thang: 6, nam: 2026, amDau: 17, amMax: 29, thangAmDau: 4, ghiChuThang: "", oNhap: {}
                 };
                 dataHeThong.tenHienTai = "";
                 dataHeThong.hienShopee = false;
@@ -195,7 +198,7 @@
             document.getElementById('chk-shopee-toggle').checked = dataHeThong.hienShopee;
             
             capNhatGiaoDienLinkShopee();
-            napMenuChonThangThoiGianThuc(); // Gọi hàm nạp menu có xử lý ưu tiên thời gian thực
+            napMenuChonThangThoiGianThuc(); 
             taiThangLichHienTai();
         }
 
@@ -223,28 +226,26 @@
                 document.getElementById('logout-form').style.display = "block";
                 document.getElementById('admin-box').style.display = "block";
             } else {
-                alert("Mật khẩu quản trị sai!");
+                alert("Mật khẩu sai!");
             }
         }
 
         function xuLyDangXuat() {
             document.getElementById('input-pass').value = '';
-            document.getElementById('status-text').innerText = "cá nhân";
+            document.getElementById('status-text').innerText = "Cá Nhân";
             document.getElementById('status-text').style.color = "#ffc000";
             document.getElementById('login-form').style.display = "block";
             document.getElementById('logout-form').style.display = "none";
             document.getElementById('admin-box').style.display = "none";
         }
 
-        // HÀM NẠP MENU CHỌN THÁNG VÀ ƯU TIÊN CHỌN THÁNG HIỆN TẠI THỜI GIAN THỰC
         function napMenuChonThangThoiGianThuc() {
             const select = document.getElementById('select-thang-chay');
             select.innerHTML = '';
             
-            // Lấy tháng và năm hiện tại từ thiết bị
             const thoiGianThuc = new Date();
             const namHienTai = thoiGianThuc.getFullYear();
-            const thangHienTai = thoiGianThuc.getMonth() + 1; // getMonth() chạy từ 0-11
+            const thangHienTai = thoiGianThuc.getMonth() + 1; 
             const keyThoiGianThuc = `${namHienTai}-${String(thangHienTai).padStart(2, '0')}`;
 
             let coThangHienTaiTrongData = false;
@@ -261,11 +262,9 @@
                 }
             });
 
-            // Nếu trong dữ liệu có tháng trùng với tháng thời gian thực thì ưu tiên chọn luôn
             if (coThangHienTaiTrongData) {
                 select.value = keyThoiGianThuc;
             } else if (danhSachKeys.length > 0) {
-                // Nếu không có tháng hiện tại, mặc định chọn tháng cuối cùng trong danh sách
                 select.value = danhSachKeys[danhSachKeys.length - 1];
             }
         }
@@ -275,11 +274,12 @@
             const n = parseInt(document.getElementById('add-nam').value);
             const ad = parseInt(document.getElementById('add-am-dau').value);
             const am = parseInt(document.getElementById('add-am-max').value);
+            const tam = parseInt(document.getElementById('add-t-am-dau').value) || 1;
 
             if(!t || !n || !ad || !am) { alert("Vui lòng điền đủ thông tin lịch!"); return; }
 
             const key = `${n}-${String(t).padStart(2, '0')}`;
-            dataHeThong.danhSachThang[key] = { thang: t, nam: n, amDau: ad, amMax: am, oNhap: {} };
+            dataHeThong.danhSachThang[key] = { thang: t, nam: n, amDau: ad, amMax: am, thangAmDau: tam, ghiChuThang: "", oNhap: {} };
 
             luuVaoBoNho();
             napMenuChonThangThoiGianThuc();
@@ -293,6 +293,13 @@
             if (!keyHienTai) return;
 
             const config = dataHeThong.danhSachThang[keyHienTai];
+            
+            if (config.thangAmDau === undefined) config.thangAmDau = 4; 
+            if (config.ghiChuThang === undefined) config.ghiChuThang = "";
+
+            // Hiển thị ghi chú tháng hiện tại lên panel box
+            document.getElementById('txt-thang-note').value = config.ghiChuThang;
+
             const container = document.getElementById('calendar-grid-container');
             container.innerHTML = '';
 
@@ -319,7 +326,9 @@
 
             let ngayHienTai = new Date(ngayDauTien);
             let ngayAmChay = config.amDau;
+            let thangAmChay = config.thangAmDau;
             let cotHienTai = thuDauTien;
+            let laNgayDauTienCuaBang = true;
 
             while (ngayHienTai.getMonth() === (config.thang - 1)) {
                 const dayKey = ngayHienTai.getDate();
@@ -330,9 +339,19 @@
                 cell.setAttribute('onclick', `kichHoatFocusVaoOPhanTu(event, ${dayKey})`);
 
                 const txtDuong = String(dayKey).padStart(2, '0');
-                const txtAm = String(ngayAmChay).padStart(2, '0');
+                
+                let txtAm = "";
+                if (laNgayDauTienCuaBang) {
+                    txtAm = `${String(ngayAmChay).padStart(2, '0')}/${String(thangAmChay).padStart(2, '0')}`;
+                    laNgayDauTienCuaBang = false;
+                } else if (ngayAmChay === 1) {
+                    txtAm = `01/${String(thangAmChay).padStart(2, '0')}`;
+                } else {
+                    txtAm = String(ngayAmChay).padStart(2, '0');
+                }
 
-                const savedData = config.oNhap[dayKey] || { numValue: "" };
+                const savedData = config.oNhap[dayKey] || { numValue: "", noteValue: "" };
+                const currentNote = savedData.noteValue || "";
 
                 cell.innerHTML = `
                     <div class="day-header">
@@ -346,13 +365,22 @@
                                data-loai="${laChunhat ? 'chunhat' : 'ngaythuong'}" 
                                value="${savedData.numValue}" 
                                oninput="ghiNhanSoLieuTrucTiep('${keyHienTai}', ${dayKey})">
+                        <input type="text" class="day-input-note" placeholder="..." 
+                               id="note-input-${dayKey}"
+                               value="${currentNote}"
+                               oninput="ghiNhanSoLieuTrucTiep('${keyHienTai}', ${dayKey})">
                     </div>
                 `;
 
                 grid.appendChild(cell);
 
                 ngayAmChay++;
-                if (ngayAmChay > config.amMax) ngayAmChay = 1;
+                if (ngayAmChay > config.amMax) {
+                    ngayAmChay = 1;
+                    thangAmChay++;
+                    if (thangAmChay > 12) thangAmChay = 1;
+                }
+
                 ngayHienTai.setDate(ngayHienTai.getDate() + 1);
                 if (cotHienTai === 7) cotHienTai = 1; else cotHienTai++;
             }
@@ -378,16 +406,26 @@
 
         function ghiNhanSoLieuTrucTiep(thangKey, dayKey) {
             const numInp = document.getElementById(`num-input-${dayKey}`);
+            const noteInp = document.getElementById(`note-input-${dayKey}`);
 
             if (!dataHeThong.danhSachThang[thangKey].oNhap[dayKey]) {
                 dataHeThong.danhSachThang[thangKey].oNhap[dayKey] = {};
             }
 
             dataHeThong.danhSachThang[thangKey].oNhap[dayKey].numValue = numInp.value;
+            dataHeThong.danhSachThang[thangKey].oNhap[dayKey].noteValue = noteInp.value;
             dataHeThong.danhSachThang[thangKey].oNhap[dayKey].loaiNgay = numInp.dataset.loai;
 
             luuVaoBoNho(); 
             tinhToanGomNhomDuLieu(); 
+        }
+
+        function ghiNhanGhiChuThang() {
+            const keyHienTai = document.getElementById('select-thang-chay').value;
+            if (!keyHienTai) return;
+            
+            dataHeThong.danhSachThang[keyHienTai].ghiChuThang = document.getElementById('txt-thang-note').value;
+            luuVaoBoNho();
         }
 
         function ghiNhanTenVaTinhTong() {
