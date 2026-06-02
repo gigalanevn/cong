@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chấm Công</title>
+    <title>Lịch Chấm Số Cá Nhân Đồng Bộ Hệ Thống</title>
     <style>
         * { box-sizing: border-box; font-family: Arial, sans-serif; }
         body { margin: 0; padding: 0; background-color: #f0f2f5; display: flex; flex-direction: column; min-height: 100vh; }
@@ -75,31 +75,30 @@
         }
         #auth-bar input { padding: 5px; border-radius: 4px; border: none; width: 70px; font-size: 12px; color: #000; text-align: center; }
         #auth-bar button { padding: 5px 10px; background: #ffd966; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; color: black; font-size: 12px; }
+        
+        .loading-text { font-size: 12px; color: #666; text-align: center; padding: 20px; font-style: italic; }
     </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
-    <!-- KHU VỰC CHỨA LINK SHOPEE Ở ĐẦU TRANG -->
     <div id="shopee-container">
-        <a href="https://s.shopee.vn/AAAUhiQ8ae" target="_blank">🧡 Mua sắm Shopee tại đây 🧡</a>
+        <a href="https://s.shopee.vn/AAAUhiQ8ae" target="_blank">🧡 Mua sắm tại Shopee tại đây 🧡</a>
     </div>
 
-    <!-- TIÊU ĐỀ CHÍNH CỦA BẢNG CHẤM CÔNG -->
     <div class="main-header-title">BẢNG CHẤM CÔNG CÁ NHÂN</div>
 
     <div id="main-container">
-        <!-- PANEL ĐIỀU KHIỂN BÊN PHẢI / DƯỚI -->
         <div id="right-panel">
-            
-            <!-- ĐỈNH TRANG: Ô NHẬP TÊN CỦA BẠN (TỐI ĐA 30 KÝ TỰ) -->
             <div class="panel-box" style="border: 2px solid #0070c0;">
                 <div class="panel-title" style="color: #0070c0; border-color: #0070c0;">TÊN NHÂN VIÊN CHẤM CÔNG</div>
                 <div class="form-group">
-                    <input type="text" id="main-user-name" class="input-highlight" placeholder="Nhập tên của bạn..." maxlength="30" oninput="ghiNhanTenVaTinhTong()">
+                    <input type="text" id="main-user-name" class="input-highlight" placeholder="Nhập tên của bạn..." maxlength="30" oninput="ghiNhanTenLocal()">
                 </div>
             </div>
 
-            <!-- NGAY DƯỚI TÊN: Ô CHỌN THÁNG LỊCH -->
             <div class="panel-box">
                 <div class="panel-title">CHỌN THÁNG LÀM VIỆC</div>
                 <div class="form-group">
@@ -107,7 +106,6 @@
                 </div>
             </div>
 
-            <!-- BẢNG TỔNG HỢP SỐ LIỆU -->
             <div class="panel-box">
                 <div class="panel-title">Kết Quả Tổng Hợp</div>
                 <table class="stat-table">
@@ -129,31 +127,28 @@
             </div>
         </div>
 
-        <!-- VÙNG LỊCH CHÍNH VÀ CÁC THÀNH PHẦN PHÍA DƯỚI LỊCH -->
         <div id="calendar-area">
-            <!-- Khung lưới lịch -->
-            <div id="calendar-grid-container"></div>
+            <div id="calendar-grid-container">
+                <div class="loading-text">Đang kết nối hệ thống dữ liệu đám mây...</div>
+            </div>
 
-            <!-- Ô GHI CHÚ CHUNG CHO THÁNG (ĐÃ CHUYỂN XUỐNG DƯỚI LỊCH) -->
             <div class="panel-box" style="margin-top: 4px;">
                 <div class="panel-title">Ghi Chú Tháng</div>
                 <div class="form-group">
-                    <textarea id="txt-thang-note" rows="3" placeholder="Nhập ghi chú chung cho tháng này tại đây..." style="font-weight: normal; font-size: 12px; resize: none;" oninput="ghiNhanGhiChuThang()"></textarea>
+                    <textarea id="txt-thang-note" rows="3" placeholder="Nhập ghi chú chung cho tháng này tại đây..." style="font-weight: normal; font-size: 12px; resize: none;" oninput="ghiNhanGhiChuThangLocal()"></textarea>
                 </div>
             </div>
 
-            <!-- CẤU HÌNH HỆ THỐNG QUẢN TRỊ (HIỂN THỊ DƯỚI LỊCH KHI ĐĂNG NHẬP) -->
             <div id="admin-box">
                 <div class="panel-title" style="color: #00b050; border-color: #00b050;">Quản Trị Hệ Thống</div>
                 
-                <!-- TÍNH NĂNG ẨN HIỆN LINK SHOPEE -->
                 <div style="margin-bottom: 12px; padding: 6px; background: #eafaf1; border-radius: 4px; font-size: 13px; font-weight: bold; color: #1e7e34;">
                     <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                        <input type="checkbox" id="chk-shopee-toggle" onchange="xuLyAnHienLinkShopee()"> Hiện Link Shopee đầu trang
+                        <input type="checkbox" id="chk-shopee-toggle" onchange="xuLyAnHienLinkShopeeAdmin()"> Hiện Link Shopee đầu trang (Toàn hệ thống)
                     </label>
                 </div>
 
-                <div class="panel-title" style="color: #555; border-color: #ccc; margin-top: 10px;">Thêm Tháng Mới</div>
+                <div class="panel-title" style="color: #555; border-color: #ccc; margin-top: 10px;">Thêm Tháng Mới Toàn Hệ Thống</div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px;">
                     <div class="form-group"><input type="number" id="add-thang" value="6" placeholder="Tháng"></div>
                     <div class="form-group"><input type="number" id="add-nam" value="2026" placeholder="Năm"></div>
@@ -166,12 +161,11 @@
                     <div class="form-group"><input type="number" id="add-t-am-dau" value="4" placeholder="Tháng Âm bắt đầu"></div>
                     <div class="form-group"><span style="font-size: 11px; color:#666; align-self: center;">(Ví dụ: Tháng 4 Âm lịch)</span></div>
                 </div>
-                <button style="width:100%; padding:8px; background:#00b050; color:white; border:none; font-weight:bold; border-radius:4px; cursor:pointer; font-size: 13px;" onclick="themThangMoi()">Tạo Tháng Mới</button>
+                <button style="width:100%; padding:8px; background:#00b050; color:white; border:none; font-weight:bold; border-radius:4px; cursor:pointer; font-size: 13px;" onclick="themThangMoiLenCloud()">Tạo Tháng Mới (Đồng Bộ Các Máy)</button>
             </div>
         </div>
     </div>
 
-    <!-- THANH ĐĂNG NHẬP / TRẠNG THÁI DƯỚI CÙNG TRANG -->
     <div id="auth-bar">
         <div style="font-size: 13px; font-weight: bold; font-style: italic;">Chế độ: <span id="status-text" style="color: #ffc000;">Cá Nhân</span></div>
         <div id="login-form">
@@ -185,103 +179,78 @@
     </div>
 
     <script>
-        const MAT_KHAU_ADMIN = "0983254756"; 
-        let dataHeThong = {
-            danhSachThang: {},
-            tenHienTai: "",
-            hienShopee: false
+        // ------------------------- ĐOẠN CẤU HÌNH FIREBASE THỰC TẾ CỦA BẠN -------------------------
+        const firebaseConfig = {
+            apiKey: "AIzaSyAk6aSNIMchYvXcSh_yCmZ3TBaMVv23IsY",
+            authDomain: "lich-cham-cong.firebaseapp.com",
+            databaseURL: "https://lich-cham-cong-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "lich-cham-cong",
+            storageBucket: "lich-cham-cong.firebasestorage.app",
+            messagingSenderId: "827697907161",
+            appId: "1:827697907161:web:cb1652b64547ffcf75c5c8"
         };
 
+        // Khởi chạy kết nối Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // ------------------------- BIẾN TOÀN CỤC HỆ THỐNG -------------------------
+        const MAT_KHAU_ADMIN = "1"; 
+        let globalDanhSachThang = {};
+        let globalHienShopee = false;
+
+        // Lưu trữ riêng tư ở máy cá nhân từng người dùng
+        let localUserData = {
+            tenNhanVien: "",
+            cacThangGhiChu: {},
+            oNhapCacThang: {}
+        };
+
+        // ------------------------- KHỞI ĐỘNG HỆ THỐNG ĐỒNG BỘ -------------------------
         function khoiDongHeThong() {
-            const duLieuGoc = localStorage.getItem('HeThongLichSieuTinhGọn_Data');
-            if (duLieuGoc) {
-                dataHeThong = JSON.parse(duLieuGoc);
-                if (dataHeThong.hienShopee === undefined) dataHeThong.hienShopee = false;
-            } else {
-                dataHeThong.danhSachThang["2026-06"] = {
-                    thang: 6, nam: 2026, amDau: 17, amMax: 29, thangAmDau: 4, ghiChuThang: "", oNhap: {}
-                };
-                dataHeThong.tenHienTai = "";
-                dataHeThong.hienShopee = false;
-                luuVaoBoNho();
+            // 1. Lấy dữ liệu cá nhân cục bộ từ máy người dùng
+            const localSaved = localStorage.getItem('LichCaNhan_User_LocalData');
+            if (localSaved) {
+                localUserData = JSON.parse(localSaved);
+                if (!localUserData.cacThangGhiChu) localUserData.cacThangGhiChu = {};
+                if (!localUserData.oNhapCacThang) localUserData.oNhapCacThang = {};
             }
-            
-            document.getElementById('main-user-name').value = dataHeThong.tenHienTai || "";
-            document.getElementById('chk-shopee-toggle').checked = dataHeThong.hienShopee;
-            
-            capNhatGiaoDienLinkShopee();
-            napMenuChonThangThoiGianThuc(); 
-            taiThangLichHienTai();
-        }
+            document.getElementById('main-user-name').value = localUserData.tenNhanVien || "";
 
-        function luuVaoBoNho() {
-            localStorage.setItem('HeThongLichSieuTinhGọn_Data', JSON.stringify(dataHeThong));
-        }
-
-        function xuLyAnHienLinkShopee() {
-            dataHeThong.hienShopee = document.getElementById('chk-shopee-toggle').checked;
-            luuVaoBoNho();
-            capNhatGiaoDienLinkShopee();
-        }
-
-        function capNhatGiaoDienLinkShopee() {
-            const el = document.getElementById('shopee-container');
-            el.style.display = dataHeThong.hienShopee ? "block" : "none";
-        }
-
-        // ĐĂNG NHẬP QUẢN TRỊ
-        function xuLyDangNhap() {
-            if (document.getElementById('input-pass').value === MAT_KHAU_ADMIN) {
-                document.getElementById('status-text').innerText = "Quản trị";
-                document.getElementById('status-text').style.color = "#00b050";
-                document.getElementById('login-form').style.display = "none";
-                document.getElementById('logout-form').style.display = "block";
-                document.getElementById('admin-box').style.display = "block";
-            } else {
-                alert("Mật khẩu sai!");
-            }
-        }
-
-        function xuLyDangXuat() {
-            document.getElementById('input-pass').value = '';
-            document.getElementById('status-text').innerText = "Cá Nhân";
-            document.getElementById('status-text').style.color = "#ffc000";
-            document.getElementById('login-form').style.display = "block";
-            document.getElementById('logout-form').style.display = "none";
-            document.getElementById('admin-box').style.display = "none";
-        }
-
-        function napMenuChonThangThoiGianThuc() {
-            const select = document.getElementById('select-thang-chay');
-            select.innerHTML = '';
-            
-            const thoiGianThuc = new Date();
-            const namHienTai = thoiGianThuc.getFullYear();
-            const thangHienTai = thoiGianThuc.getMonth() + 1; 
-            const keyThoiGianThuc = `${namHienTai}-${String(thangHienTai).padStart(2, '0')}`;
-
-            let coThangHienTaiTrongData = false;
-            const danhSachKeys = Object.keys(dataHeThong.danhSachThang).sort();
-
-            danhSachKeys.forEach(key => {
-                const opt = document.createElement('option');
-                opt.value = key;
-                opt.innerText = `Tháng ${dataHeThong.danhSachThang[key].thang} / Năm ${dataHeThong.danhSachThang[key].nam}`;
-                select.appendChild(opt);
-
-                if (key === keyThoiGianThuc) {
-                    coThangHienTaiTrongData = true;
+            // 2. Lắng nghe cập nhật trực tuyến từ Firebase đám mây
+            db.ref("heThongLich").on("value", (snapshot) => {
+                const cloudData = snapshot.val();
+                if (cloudData) {
+                    globalDanhSachThang = cloudData.danhSachThang || {};
+                    globalHienShopee = cloudData.hienShopee || false;
+                } else {
+                    // Tạo tháng 6/2026 mẫu nếu cơ sở dữ liệu trên cloud đang trống hoàn toàn
+                    globalDanhSachThang = {
+                        "2026-06": { thang: 6, nam: 2026, amDau: 17, amMax: 29, thangAmDau: 4 }
+                    };
+                    globalHienShopee = false;
+                    db.ref("heThongLich").set({
+                        danhSachThang: globalDanhSachThang,
+                        hienShopee: globalHienShopee
+                    });
                 }
-            });
 
-            if (coThangHienTaiTrongData) {
-                select.value = keyThoiGianThuc;
-            } else if (danhSachKeys.length > 0) {
-                select.value = danhSachKeys[danhSachKeys.length - 1];
-            }
+                // Cập nhật trạng thái hiển thị shopee
+                document.getElementById('chk-shopee-toggle').checked = globalHienShopee;
+                document.getElementById('shopee-container').style.display = globalHienShopee ? "block" : "none";
+                
+                // Nạp dữ liệu vào thanh menu chọn tháng và vẽ lưới lịch
+                napMenuChonThangThoiGianThuc();
+                taiThangLichHienTai();
+            });
         }
 
-        function themThangMoi() {
+        function luuDuLieuLocalRaTrinhDuyet() {
+            localStorage.setItem('LichCaNhan_User_LocalData', JSON.stringify(localUserData));
+        }
+
+        // ------------------------- QUẢN TRỊ VIÊN TẠO THÁNG MỚI LÊN CLOUD -------------------------
+        function themThangMoiLenCloud() {
             const t = parseInt(document.getElementById('add-thang').value);
             const n = parseInt(document.getElementById('add-nam').value);
             const ad = parseInt(document.getElementById('add-am-dau').value);
@@ -291,26 +260,65 @@
             if(!t || !n || !ad || !am) { alert("Vui lòng điền đủ thông tin lịch!"); return; }
 
             const key = `${n}-${String(t).padStart(2, '0')}`;
-            dataHeThong.danhSachThang[key] = { thang: t, nam: n, amDau: ad, amMax: am, thangAmDau: tam, ghiChuThang: "", oNhap: {} };
+            globalDanhSachThang[key] = { thang: t, nam: n, amDau: ad, amMax: am, thangAmDau: tam };
 
-            luuVaoBoNho();
-            napMenuChonThangThoiGianThuc();
-            document.getElementById('select-thang-chay').value = key;
-            taiThangLichHienTai();
-            alert("Đã thêm cấu hình tháng mới!");
+            db.ref("heThongLich/danhSachThang").set(globalDanhSachThang)
+            .then(() => {
+                document.getElementById('select-thang-chay').value = key;
+                alert("Đã tạo và đồng bộ tháng mới thành công tới tất cả các thiết bị!");
+            })
+            .catch((error) => {
+                alert("Lỗi kết nối đám mây: " + error.message);
+            });
+        }
+
+        function xuLyAnHienLinkShopeeAdmin() {
+            const hienThi = document.getElementById('chk-shopee-toggle').checked;
+            db.ref("heThongLich/hienShopee").set(hienThi);
+        }
+
+        // ------------------------- XỬ LÝ GIAO DIỆN LỊCH VÀ NHẬP LIỆU CÁ NHÂN -------------------------
+        function napMenuChonThangThoiGianThuc() {
+            const select = document.getElementById('select-thang-chay');
+            const giaTriHienTaiGiaDinh = select.value;
+            select.innerHTML = '';
+            
+            const thoiGianThuc = new Date();
+            const namHienTai = thoiGianThuc.getFullYear();
+            const thangHienTai = thoiGianThuc.getMonth() + 1; 
+            const keyThoiGianThuc = `${namHienTai}-${String(thangHienTai).padStart(2, '0')}`;
+
+            let coThangHienTaiTrongData = false;
+            const danhSachKeys = Object.keys(globalDanhSachThang).sort();
+
+            danhSachKeys.forEach(key => {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.innerText = `Tháng ${globalDanhSachThang[key].thang} / Năm ${globalDanhSachThang[key].nam}`;
+                select.appendChild(opt);
+
+                if (key === keyThoiGianThuc) coThangHienTaiTrongData = true;
+            });
+
+            if (globalDanhSachThang[giaTriHienTaiGiaDinh]) {
+                select.value = giaTriHienTaiGiaDinh;
+            } else if (coThangHienTaiTrongData) {
+                select.value = keyThoiGianThuc;
+            } else if (danhSachKeys.length > 0) {
+                select.value = danhSachKeys[danhSachKeys.length - 1];
+            }
         }
 
         function taiThangLichHienTai() {
             const keyHienTai = document.getElementById('select-thang-chay').value;
             if (!keyHienTai) return;
 
-            const config = dataHeThong.danhSachThang[keyHienTai];
+            const config = globalDanhSachThang[keyHienTai];
+            if (!config) return;
             
             if (config.thangAmDau === undefined) config.thangAmDau = 4; 
-            if (config.ghiChuThang === undefined) config.ghiChuThang = "";
 
-            // Cập nhật nội dung ghi chú tháng xuống ô textarea bên dưới lịch
-            document.getElementById('txt-thang-note').value = config.ghiChuThang;
+            document.getElementById('txt-thang-note').value = localUserData.cacThangGhiChu[keyHienTai] || "";
 
             const container = document.getElementById('calendar-grid-container');
             container.innerHTML = '';
@@ -342,6 +350,8 @@
             let cotHienTai = thuDauTien;
             let laNgayDauTienCuaBang = true;
 
+            const oNhapThangCuaMay = localUserData.oNhapCacThang[keyHienTai] || {};
+
             while (ngayHienTai.getMonth() === (config.thang - 1)) {
                 const dayKey = ngayHienTai.getDate();
                 const laChunhat = (cotHienTai === 7);
@@ -362,7 +372,8 @@
                     txtAm = String(ngayAmChay).padStart(2, '0');
                 }
 
-                const savedData = config.oNhap[dayKey] || { numValue: "", noteValue: "" };
+                const savedData = oNhapThangCuaMay[dayKey] || { numValue: "", noteValue: "" };
+                const currentNum = savedData.numValue || "";
                 const currentNote = savedData.noteValue || "";
 
                 cell.innerHTML = `
@@ -375,12 +386,12 @@
                                id="num-input-${dayKey}"
                                data-day="${dayKey}" 
                                data-loai="${laChunhat ? 'chunhat' : 'ngaythuong'}" 
-                               value="${savedData.numValue}" 
-                               oninput="ghiNhanSoLieuTrucTiep('${keyHienTai}', ${dayKey})">
+                               value="${currentNum}" 
+                               oninput="ghiNhanSoLieuCucBo('${keyHienTai}', ${dayKey})">
                         <input type="text" class="day-input-note" placeholder="..." 
                                id="note-input-${dayKey}"
                                value="${currentNote}"
-                               oninput="ghiNhanSoLieuTrucTiep('${keyHienTai}', ${dayKey})">
+                               oninput="ghiNhanSoLieuCucBo('${keyHienTai}', ${dayKey})">
                     </div>
                 `;
 
@@ -416,42 +427,41 @@
             }
         }
 
-        function ghiNhanSoLieuTrucTiep(thangKey, dayKey) {
+        function ghiNhanSoLieuCucBo(thangKey, dayKey) {
             const numInp = document.getElementById(`num-input-${dayKey}`);
             const noteInp = document.getElementById(`note-input-${dayKey}`);
 
-            if (!dataHeThong.danhSachThang[thangKey].oNhap[dayKey]) {
-                dataHeThong.danhSachThang[thangKey].oNhap[dayKey] = {};
-            }
+            if (!localUserData.oNhapCacThang[thangKey]) localUserData.oNhapCacThang[thangKey] = {};
+            if (!localUserData.oNhapCacThang[thangKey][dayKey]) localUserData.oNhapCacThang[thangKey][dayKey] = {};
 
-            dataHeThong.danhSachThang[thangKey].oNhap[dayKey].numValue = numInp.value;
-            dataHeThong.danhSachThang[thangKey].oNhap[dayKey].noteValue = noteInp.value;
-            dataHeThong.danhSachThang[thangKey].oNhap[dayKey].loaiNgay = numInp.dataset.loai;
+            localUserData.oNhapCacThang[thangKey][dayKey].numValue = numInp.value;
+            localUserData.oNhapCacThang[thangKey][dayKey].noteValue = noteInp.value;
+            localUserData.oNhapCacThang[thangKey][dayKey].loaiNgay = numInp.dataset.loai;
 
-            luuVaoBoNho(); 
+            luuDuLieuLocalRaTrinhDuyet(); 
             tinhToanGomNhomDuLieu(); 
         }
 
-        function ghiNhanGhiChuThang() {
+        function ghiNhanGhiChuThangLocal() {
             const keyHienTai = document.getElementById('select-thang-chay').value;
             if (!keyHienTai) return;
             
-            dataHeThong.danhSachThang[keyHienTai].ghiChuThang = document.getElementById('txt-thang-note').value;
-            luuVaoBoNho();
+            localUserData.cacThangGhiChu[keyHienTai] = document.getElementById('txt-thang-note').value;
+            luuDuLieuLocalRaTrinhDuyet();
         }
 
-        function ghiNhanTenVaTinhTong() {
+        function ghiNhanTenLocal() {
             let entries = document.getElementById('main-user-name').value;
             if (entries) {
                 entries = entries.replace(/\s+/g, ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
             }
-            dataHeThong.tenHienTai = entries;
-            localStorage.setItem('HeThongLichSieuTinhGọn_Data', JSON.stringify(dataHeThong));
+            localUserData.tenNhanVien = entries;
+            luuDuLieuLocalRaTrinhDuyet();
             tinhToanGomNhomDuLieu();
         }
 
         function tinhToanGomNhomDuLieu() {
-            const tenNguoiDung = dataHeThong.tenHienTai ? dataHeThong.tenHienTai.trim() : "";
+            const tenNguoiDung = localUserData.tenNhanVien ? localUserData.tenNhanVien.trim() : "";
             
             if (tenNguoiDung === "") {
                 document.getElementById('lbl-tong-ten').innerText = "Chưa nhập tên...";
@@ -468,10 +478,10 @@
             const keyHienTai = document.getElementById('select-thang-chay').value;
             if (!keyHienTai) return;
 
-            const oNhapDuLieu = dataHeThong.danhSachThang[keyHienTai].oNhap;
+            const oNhapDuLieuThang = localUserData.oNhapCacThang[keyHienTai] || {};
 
-            Object.keys(oNhapDuLieu).forEach(dayKey => {
-                const item = oNhapDuLieu[dayKey];
+            Object.keys(oNhapDuLieuThang).forEach(dayKey => {
+                const item = oNhapDuLieuThang[dayKey];
                 const giaTriSo = parseFloat(item.numValue) || 0;
                 const loaiNgay = item.loaiNgay || "ngaythuong";
 
@@ -486,6 +496,28 @@
 
             document.getElementById('lbl-tong-thuong').innerText = tongNgayThuong.toLocaleString('vi-VN');
             document.getElementById('lbl-tong-cn').innerText = tongChuNhat.toLocaleString('vi-VN');
+        }
+
+        // ------------------------- ĐĂNG NHẬP / ĐĂNG XUẤT ADMIN -------------------------
+        function xuLyDangNhap() {
+            if (document.getElementById('input-pass').value === MAT_KHAU_ADMIN) {
+                document.getElementById('status-text').innerText = "Quản trị";
+                document.getElementById('status-text').style.color = "#00b050";
+                document.getElementById('login-form').style.display = "none";
+                document.getElementById('logout-form').style.display = "block";
+                document.getElementById('admin-box').style.display = "block";
+            } else {
+                alert("Mật khẩu sai!");
+            }
+        }
+
+        function xuLyDangXuat() {
+            document.getElementById('input-pass').value = '';
+            document.getElementById('status-text').innerText = "Cá Nhân";
+            document.getElementById('status-text').style.color = "#ffc000";
+            document.getElementById('login-form').style.display = "block";
+            document.getElementById('logout-form').style.display = "none";
+            document.getElementById('admin-box').style.display = "none";
         }
 
         window.onload = khoiDongHeThong;
