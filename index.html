@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chấm Công</title>
+    <title>Lịch Chấm Số Cá Nhân Bảo Mật Cao</title>
     <style>
         * { box-sizing: border-box; font-family: Arial, sans-serif; }
         body { margin: 0; padding: 0; background-color: #f0f2f5; display: flex; flex-direction: column; min-height: 100vh; }
@@ -38,6 +38,19 @@
         .day-header { display: flex; justify-content: space-between; font-size: 10px; font-weight: bold; pointer-events: none; line-height: 1; }
         .txt-duong { color: #0070c0; }
         .txt-am { color: #ed7d31; font-size: 9px; }
+
+        /* MÀU ĐẶC BIỆT CHO NGÀY HÔM NAY (TODAY) */
+        .day-cell.is-today { 
+            background-color: #e6f7ff !important; /* Nền xanh dương nhạt nhẽo hẳn so với ngày thường */
+            outline: 2px solid #0050b3; /* Tạo viền đậm nổi bật xung quanh ô */
+            outline-offset: -2px; 
+            z-index: 10; /* Đẩy lớp lên trên để không bị che khuất viền */
+        }
+        .day-cell.is-today .txt-duong {
+            color: #0050b3;
+            font-size: 12px; /* Tăng kích thước số ngày dương hôm nay một chút */
+            text-shadow: 0px 0px 1px rgba(0,0,0,0.2);
+        }
 
         /* Ô NHẬP SỐ VÀ Ô GHI CHÚ */
         .day-content-area { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 2px; pointer-events: none; }
@@ -137,7 +150,7 @@
             <div class="panel-box" style="margin-top: 4px;">
                 <div class="panel-title">Ghi Chú Tháng</div>
                 <div class="form-group">
-                    <textarea id="txt-thang-note" rows="3" placeholder="Nhập ghi chú chung, ghi chú riêng nhập ở ... trong ô ngày" style="font-weight: normal; font-size: 12px; resize: none;" oninput="ghiNhanGhiChuThangLocal()"></textarea>
+                    <textarea id="txt-thang-note" rows="3" placeholder="Nhập ghi chú chung cho tháng này tại đây..." style="font-weight: normal; font-size: 12px; resize: none;" oninput="ghiNhanGhiChuThangLocal()"></textarea>
                 </div>
             </div>
 
@@ -168,7 +181,6 @@
         </div>
     </div>
 
-    <!-- THANH ĐĂNG NHẬP AUTHENTICATION MỚI -->
     <div id="auth-bar">
         <div style="font-size: 13px; font-weight: bold; font-style: italic;">Chế độ: <span id="status-text" style="color: #ffc000;">Cá Nhân</span></div>
         <div id="login-form" class="login-inputs">
@@ -195,23 +207,20 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const auth = firebase.auth(); // Kích hoạt module Auth
+        const auth = firebase.auth();
 
         let globalDanhSachThang = {};
         let globalHienShopee = false;
         let localUserData = { tenNhanVien: "", cacThangGhiChu: {}, oNhapCacThang: {} };
 
-        // THEO DÕI TRẠNG THÁI ĐĂNG NHẬP THỜI GIAN THỰC CỦA FIREBASE
         auth.onAuthStateChanged((user) => {
             if (user) {
-                // Nếu đã đăng nhập thành công trực tuyến
                 document.getElementById('status-text').innerText = "Quản trị";
                 document.getElementById('status-text').style.color = "#00b050";
                 document.getElementById('login-form').style.display = "none";
                 document.getElementById('logout-form').style.display = "block";
                 document.getElementById('admin-box').style.display = "block";
             } else {
-                // Nếu chưa đăng nhập hoặc đã đăng xuất
                 document.getElementById('status-text').innerText = "Cá Nhân";
                 document.getElementById('status-text').style.color = "#ffc000";
                 document.getElementById('login-form').style.display = "flex";
@@ -246,27 +255,19 @@
             localStorage.setItem('LichCaNhan_User_LocalData', JSON.stringify(localUserData));
         }
 
-        // ĐĂNG NHẬP BẢO MẬT QUA FIREBASE AUTH
         function xuLyDangNhap() {
             const email = document.getElementById('input-email').value;
             const pass = document.getElementById('input-pass').value;
-
             if (!email || !pass) { alert("Vui lòng nhập đủ Email và Mật khẩu!"); return; }
-
             auth.signInWithEmailAndPassword(email, pass)
             .then(() => {
-                // Xóa trắng ô mật khẩu sau khi đăng nhập thành công
                 document.getElementById('input-email').value = '';
                 document.getElementById('input-pass').value = '';
             })
-            .catch((error) => {
-                alert("Đăng nhập thất bại! " );
-            });
+            .catch((error) => { alert("Đăng nhập thất bại: " + error.message); });
         }
 
-        function xuLyDangXuat() {
-            auth.signOut();
-        }
+        function xuLyDangXuat() { auth.signOut(); }
 
         function themThangMoiLenCloud() {
             if (!auth.currentUser) { alert("Bạn không có quyền thực hiện!"); return; }
@@ -359,6 +360,12 @@
                 grid.appendChild(emptyCell);
             }
 
+            // Lấy thời gian thực tại thời điểm render để so sánh "Ngày hôm nay"
+            const homNay = new Date();
+            const dHienTai = homNay.getDate();
+            const mHienTai = homNay.getMonth() + 1;
+            const yHienTai = homNay.getFullYear();
+
             let ngayHienTai = new Date(ngayDauTien);
             let ngayAmChay = config.amDau;
             let thangAmChay = config.thangAmDau;
@@ -371,8 +378,12 @@
                 const dayKey = ngayHienTai.getDate();
                 const laChunhat = (cotHienTai === 7);
                 
+                // Kiểm tra xem ngày đang vẽ có đúng là NGÀY HÔM NAY không
+                const laNgayHomNay = (dayKey === dHienTai && config.thang === mHienTai && config.nam === yHienTai);
+
                 const cell = document.createElement('div');
-                cell.className = `day-cell ${laChunhat ? 'bg-yellow' : ''}`;
+                // Nếu đúng là hôm nay, tự động chèn thêm class 'is-today' để ăn CSS đổi màu
+                cell.className = `day-cell ${laChunhat ? 'bg-yellow' : ''} ${laNgayHomNay ? 'is-today' : ''}`;
                 cell.setAttribute('onclick', `kichHoatFocusVaoOPhanTu(event, ${dayKey})`);
 
                 const txtDuong = String(dayKey).padStart(2, '0');
